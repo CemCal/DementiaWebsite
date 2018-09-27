@@ -8,4 +8,10 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Player\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Views\Home\Player.cshtml" />
+  </ItemGroup>
 </Project>

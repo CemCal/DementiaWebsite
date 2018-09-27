@@ -49,7 +49,7 @@ namespace DementiaWebsite
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            /*
             app.Use(async (context, next) =>
             {
                 if (context.Request.Path.Value.Contains("invalid"))
@@ -58,8 +58,9 @@ namespace DementiaWebsite
                 }
                 await next();
 
-            });
-           
+            });*/
+
+            //routing method which will look for "Controllers","/public methods in those classes and what parameters they might have
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
