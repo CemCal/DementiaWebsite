@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DementiaWebsite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,50 +15,59 @@ namespace DementiaWebsite
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        readonly IConfigurationRoot configuration;
+
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+                 configuration = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
+                .AddJsonFile(env.ContentRootPath + "/appsettings.json")
+                .AddJsonFile(env.ContentRootPath + "/appsettings.Development.json", true)
+                .Build();
         }
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<CookiePolicyOptions>(options =>
+            services.AddTransient<FeatureToggles>(x => new FeatureToggles
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                EnableDeveloperExceptions = configuration.GetValue<bool>("FeatureToggles:EnableDeveloperExceptions")
             });
 
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            //this method should always be implemented with app.UseMvc()
+            services.AddMvc();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+
+        public void Configure(IApplicationBuilder app,
+                              IHostingEnvironment env,
+                              FeatureToggles features)
         {
-            if (env.IsDevelopment())
+
+            if (features.EnableDeveloperExceptions)
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
+
+            app.Use(async (context, next) =>
             {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
+                if (context.Request.Path.Value.Contains("invalid"))
+                {
+                    throw new Exception("ERROR!");
+                }
+                await next();
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseCookiePolicy();
-
+            });
+           
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=home}/{action=Index}/{id?}");
             });
+         
+            app.UseFileServer();
         }
     }
 }
