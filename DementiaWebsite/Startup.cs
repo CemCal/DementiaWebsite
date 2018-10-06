@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using DementiaWebsite.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DementiaWebsite
 {
@@ -37,6 +39,8 @@ namespace DementiaWebsite
 
             //this method should always be implemented with app.UseMvc()
             services.AddMvc();
+            var connection = @"Data Source=sql6006.site4now.net;Initial Catalog=DB_A2B2C0_group6uclhumber;Persist Security Info=True;User ID=DB_A2B2C0_group6uclhumber_admin;Password=group6uclhumber";
+            services.AddDbContext<DB_A2B2C0_group6uclhumberContext>(options => options.UseSqlServer(connection));
         }
 
 
